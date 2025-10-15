@@ -1,0 +1,72 @@
+# tools/build-tools-win.ps1
+$ErrorActionPreference = "Stop"
+$ROOT = Resolve-Path "$PSScriptRoot\.."
+$WORK = Join-Path $PSScriptRoot ".venv-build"
+$OUT  = Join-Path $ROOT "bin\win"
+$LIC  = Join-Path $ROOT "LICENSES"
+
+Write-Host "Prepare..."
+if (Test-Path $WORK) { Remove-Item $WORK -Recurse -Force }
+New-Item $WORK -ItemType Directory -Force | Out-Null
+New-Item $OUT  -ItemType Directory -Force | Out-Null
+New-Item $LIC  -ItemType Directory -Force | Out-Null
+
+Write-Host "Create venv & install deps..."
+python -m venv $WORK
+& "$WORK\Scripts\python.exe" -m pip install --upgrade pip
+& "$WORK\Scripts\python.exe" -m pip install esptool mpremote pyinstaller pyserial cryptography
+
+# esptool.spec
+@"
+block_cipher=None
+a = Analysis(['-m','esptool'], pathex=[], binaries=[], datas=[],
+  hiddenimports=['serial','serial.tools.list_ports','encodings.idna'],
+  hookspath=[], hooksconfig={}, runtime_hooks=[], excludes=[], noarchive=False)
+pyz = PYZ(a.pure)
+exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name='esptool',
+  console=True, disable_windowed_traceback=False, target_arch=None, icon=None)
+coll = COLLECT(exe, a.binaries, a.zipfiles, a.datas, strip=False, upx=False, name='esptool')
+"@ | Set-Content "$PSScriptRoot\esptool.spec" -Encoding UTF8
+
+# mpremote.spec
+@"
+block_cipher=None
+a = Analysis(['-m','mpremote'], pathex=[], binaries=[], datas=[],
+  hiddenimports=['serial','serial.tools.list_ports','encodings.idna'],
+  hookspath=[], hooksconfig={}, runtime_hooks=[], excludes=[], noarchive=False)
+pyz = PYZ(a.pure)
+exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name='mpremote',
+  console=True, disable_windowed_traceback=False, target_arch=None, icon=None)
+coll = COLLECT(exe, a.binaries, a.zipfiles, a.datas, strip=False, upx=False, name='mpremote')
+"@ | Set-Content "$PSScriptRoot\mpremote.spec" -Encoding UTF8
+
+Write-Host "Build exe..."
+& "$WORK\Scripts\pyinstaller.exe" --onefile --clean -y "$PSScriptRoot\esptool.spec"
+& "$WORK\Scripts\pyinstaller.exe" --onefile --clean -y "$PSScriptRoot\mpremote.spec"
+
+Copy-Item "$PSScriptRoot\dist\esptool\esptool.exe" "$OUT\esptool.exe" -Force
+Copy-Item "$PSScriptRoot\dist\mpremote\mpremote.exe" "$OUT\mpremote.exe" -Force
+
+Write-Host "Checksums..."
+$sha1 = (Get-FileHash "$OUT\esptool.exe" -Algorithm SHA256).Hash.ToLower()
+$sha2 = (Get-FileHash "$OUT\mpremote.exe" -Algorithm SHA256).Hash.ToLower()
+@"
+$sha1  win/esptool.exe
+$sha2  win/mpremote.exe
+"@ | Set-Content (Join-Path $ROOT "bin\checksums.txt") -Encoding ascii
+
+Write-Host "Copy upstream LICENSE..."
+$site = & "$WORK\Scripts\python.exe" -c "import site,glob,os;[print(p) for p in site.getsitepackages()]"
+$espl=$null;$mprl=$null
+$site -split "`n" | %{
+  Get-ChildItem (Join-Path $_ 'esptool*') -Directory -ErrorAction SilentlyContinue | %{
+    $f=Join-Path $_ 'LICENSE'; if(Test-Path $f){$espl=$f}
+  }
+  Get-ChildItem (Join-Path $_ 'mpremote*') -Directory -ErrorAction SilentlyContinue | %{
+    $f=Join-Path $_ 'LICENSE'; if(Test-Path $f){$mprl=$f}
+  }
+}
+if ($espl){ Copy-Item $espl (Join-Path $LIC 'esptool.LICENSE') -Force } else { 'See upstream.' | Set-Content (Join-Path $LIC 'esptool.LICENSE') }
+if ($mprl){ Copy-Item $mprl (Join-Path $LIC 'mpremote.LICENSE') -Force } else { 'See upstream.' | Set-Content (Join-Path $LIC 'mpremote.LICENSE') }
+
+Write-Host "Done -> bin\win\esptool.exe & mpremote.exe"
