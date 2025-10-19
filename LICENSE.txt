@@ -1,0 +1,14 @@
+Copyright (c) 2025 Yanbin Niu. All rights reserved.
+
+This software (including but not limited to its code, binary files, documentation, 
+and media assets) is proprietary and confidential.
+
+Permission is hereby granted to install and use this Visual Studio Code extension 
+("MicroPython Starter Kit") for personal or internal business purposes, 
+subject to the following conditions:
+
+1. Redistribution, modification, reverse engineering, or resale is strictly prohibited.
+2. Pro or paid features require a valid license or activation from the author.
+3. The author retains all intellectual property rights.
+
+Unauthorized use or distribution may result in legal action.

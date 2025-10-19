@@ -4,6 +4,12 @@
 > 让 MicroPython 开发体验更像桌面 IDE。
 
 ---
+## 接线图
+请查看docs目录下对应的芯片型号和屏幕型号
+
+## 使用步骤
+![alt text](demo.gif)
+
 
 ## 功能概述
 
@@ -12,13 +18,14 @@ LVGL Starter Kit 是一个专为 **ESP32 + LVGL 显示屏** 设计的 VS Code �
 
 -  **设备识别与端口选择** — 自动列出串口设备，一键连接。
 -  **一键烧录固件** — 内置编译好的 ESP32-S3 + MicroPython + LVGL 固件。
--  **运行示例** — 内置多个基础示例（文字 / 按钮 / 图片）。
+-  **运行示例** — 内置基础示例。
 -  **串口 REPL 控制台** — 支持命令交互与调试输出高亮。
 -  **暂时仅支持Windows** 
 
 ---
 
 ##  安装说明
+
 
 1. 从 [VS Code Marketplace](https://marketplace.visualstudio.com/) 搜索并安装 **“LVGL Starter Kit”**。  
 2. 或者手动安装：
@@ -44,7 +51,7 @@ LVGL Starter Kit 是一个专为 **ESP32 + LVGL 显示屏** 设计的 VS Code �
    - 若提示空间不足，可先执行 “清空设备文件系统”。  
 
 4. **检查屏幕接线**  
-   - 对照示例中的 `pin_config.py` 检查引脚定义。  
+   - 对照文档中的芯片型号和屏幕型号检查引脚定义和接线。  
    - 确保屏幕供电正常（3.3V / 5V）。  
 
 5. **检查 LVGL 是否初始化**  
@@ -70,6 +77,7 @@ LVGL Starter Kit: 打开控制面板
 
 **Q4. 屏幕白屏但串口无报错**
 → 检查屏幕型号和引脚定义是否匹配 Demo 示例。
+
 ---
 
 
