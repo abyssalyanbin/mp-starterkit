@@ -8,7 +8,7 @@
 请查看docs目录下对应的芯片型号和屏幕型号
 
 ## 使用步骤
-![alt text](demo.gif)
+![alt text](/docs/demo.gif)
 
 
 ## 功能概述
